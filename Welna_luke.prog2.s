@@ -27,8 +27,16 @@
 #############################################
 .data
 
-seq0:	.word 16 56 4   80  48  24  20  84  56  16
-seq1:	.word 60 66 157 293 329 329 334 304 131 124
+seq0:	.word 16  56  4   80  48  24  20  84  56  16
+seq1:	.word 60  66  157 293 329 329 334 304 131 124
+seqA1:  .word 60  66  157 293 329 329 334 304 131 124
+seqA2:  .word 0   56  72  80  102 420 296 274 326 0
+seqA3:  .word 16  56  40  68  68  130 254 130 130 130
+seqA4:  .word 252 130 130 130 252 130 130 130 130 252
+seqB1:  .word 65  34  20  8   20  34  65  0   0   0
+seqB2:  .word 8   8   8   127 8   8   8   0   0   0
+seqC1:  .word 0   60  64  128 128 128 128 64  60  0
+seqC2:  .word 0   248 132 130 130 130 130 132 248 0
 
 newLine:
 	.asciiz "\n"
@@ -51,8 +59,9 @@ main:
 	
 	addi $s0, $0, 0			# i = 0
 	addi $s1, $0, 10		# $t1 = number of columns (10 instead of 9 because I was off by one, quicker to just change it to 10)
-	la   $s2, seq1			# $s2 = address of seq1
-#	addi $sp, $sp, 4		# increment the stack pointer
+	la   $s2, seqC2			# $s2 = address of seq1
+	addi $sp, $sp, -4		# decrement the stack pointer for 1 item
+	sw $ra, 0($sp)
 	
 LoopVector:
 	
@@ -60,9 +69,7 @@ LoopVector:
 	add $t0, $t0, $s2		# address of $s2[i]
 	beq $s0, $s1, exit		# exit if $s0 == $s1 once this loop is done the program will be over
 	lw $a0, 0($t0)	        #$a0 = $s2[i] ($t0 = i * 4)
-#	sw   $sp  0($ra)		# store $ra on the stack
 	jal rowprint
-	#SAVE $ra IN STACK#
 	addi $s0, $s0, 1		# i++ 
 	j LoopVector			# jump to loop
 	
@@ -87,22 +94,22 @@ rowprint:
 	
 	loopRow:
 	beq $t0, $0, return		  # if $t0 == $s1 (in other words if i == 0) exit loop
-	# (not needed, i dont think) sll $t1, $t0, 2		  
-	# $t0 = i * 4 will be used to store the bits in an array for the binary representation of an int
+	j printChar	  
+# 	$t0 = i * 4 will be used to store the bits in an array for the binary representation of an int
 
-	and $t3, $t2, $t0 		  # $t3 = $t2 equals its self anded with $t0 
-	beq  $t3, 1, PrintX
-	beq  $t3, 0, PrintDash
+#	and $t3, $t2, $t0 		  # $t3 = $t2 equals its self anded with $t0 
+#	beq  $t3, 1, PrintX
+#	beq  $t3, 0, PrintDash
 		
-PrintX:
-	la $a0, result1
-	li $v0, 4
-	syscall
-	j loopAgain
-PrintDash:
-	la $a0, result0
-	li $v0, 4
-	syscall
+#PrintX:
+#	la $a0, result1
+#	li $v0, 4
+#	syscall
+#	j loopAgain
+#PrintDash:
+#	la $a0, result0
+#	li $v0, 4
+#	syscall
 
 loopAgain:	
 
@@ -121,7 +128,21 @@ return:						# prints a new line and returns
 
 
 	# Your other procedures go here...
-
+printChar:
+	and $t3, $t2, $t0 		  # $t3 = $t2 equals its self anded with $t0 
+	beq  $t3, 1, PrintX
+	beq  $t3, 0, PrintDash
+		
+PrintX:
+	la $a0, result1			  # load result1 in $a0
+	li $v0, 4
+	syscall
+	j loopAgain
+PrintDash:
+	la $a0, result0
+	li $v0, 4
+	syscall
+	j loopAgain
 
 
 ############################################# 
