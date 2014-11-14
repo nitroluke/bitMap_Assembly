@@ -76,10 +76,7 @@ main:
 	
 	
 	
-LoopVector:
- #   sw $ra, 0($sp)			# store $ra on the stack
- #	addi $sp, $sp, -4		# decrement the stack pointer for 1 item
-	
+LoopVector: # calls rowPrint 
 	sll $t0, $s0, 2			# $t0 = i * 4 will be used to access the address of the array
 	add $t0, $t0, $s2		# address of $s2[i]
 	beq $s0, $s1, exit		# exit if $s0 == $s1 once this loop is done the program will be over
@@ -98,7 +95,7 @@ LoopVector:
 #										    #
 #############################################
 
-rowprint:
+rowprint: # calls print char 10 times
 
 	# complete your procedure body here
     # do not forgot to ample comments!
@@ -115,13 +112,11 @@ loopRow:
 	
 loopAgain:	
 	add $a0, $t2, $0		# resets $a0 to original value
-	srl $t0, $t0,  1		# shift $i right by 1 (just messing around at this point), they are hex in the registers
+	srl $t0, $t0,  1		# shift $i right by 1 
 	j loopRow				# jump to loopRow
 
 return:						# prints a new line and returns	
-	la $a0, newLine			# sets $a0 to the string in newLine
-	li $v0, 4
-	syscall 
+	jal printLine
 	addi $sp, $sp, 4		# add 4 to the stack pointer
 	lw $ra 0($sp)			# restore $ra
 	jr $ra					# return to calling function
@@ -132,7 +127,7 @@ return:						# prints a new line and returns
 ##                                         ## 
 ##                                         ##  
 ##	 - inputs :                            ##
-##   - outputs:                            ##  
+##   - outputs: prints char to console     ##  
 ##                                         ##  
 ##                                         ##  
 #############################################	
@@ -140,7 +135,7 @@ return:						# prints a new line and returns
 
 	# Your other procedures go here...
 printChar:
-	and $t3, $t2, $t0 		  # $t3 = $t2 equals its self anded with $t0 
+	and $t3, $t2 , $t0 		  # $t3 = $t2 equals its self anded with $t0 
 	beq  $t3, 1, PrintX
 	beq  $t3, 0, PrintDash
 		
@@ -148,15 +143,20 @@ PrintX:
 	la $a0, result1			  # load result1 in $a0
 	li $v0, 4
 	syscall
-	jr $ra
+	jr $ra					  # jump return
 	
 PrintDash:
-	la $a0, result0
-	li $v0, 4
+	la $a0, result0			  # load result0 in $a0
+	li $v0, 4		
 	syscall
-	jr $ra
+	jr $ra					  # jump return
 	
-
+printLine:
+	la $a0, newLine			# sets $a0 to the string in newLine
+	li $v0, 4
+	syscall 
+	
+	jr $ra
 ############################################# 
 # Procedure: exit   					    #
 #   - exit the program                      #
